@@ -8,138 +8,221 @@
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css"/>
-
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 
 <style>
-  * {
-    box-sizing: border-box;
-  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
-    --bg:        #000000;
-    --bg-panel:  #0a0a0a;
-    --border:    #333333;
-    --text:      #ffffff;
-    --muted:     #ffffff;
-    --accent:    #ff6d00;
-    --accent2:   #ff9100;
-    --link:      #ff6d00;
-    --toggle-bg: rgba(255,255,255,0.08);
-    transition: background 0.25s;
+    --bg:      #0f0e0d;
+    --panel:   #161412;
+    --border:  #2a2520;
+    --text:    #ffffff;
+    --muted:   #888888;
+    --accent:  #da7756;
+    --accent2: #f0c070;
   }
-
   :root.light {
-    --bg:        #ffffff;
-    --bg-panel:  #ffffff;
-    --border:    #bbbbbb;
-    --text:      #000000;
-    --muted:     #000000;
-    --accent:    #c84b00;
-    --accent2:   #e65100;
-    --link:      #c84b00;
-    --toggle-bg: rgba(0,0,0,0.08);
+    --bg:      #ffffff;
+    --panel:   #f5f5f5;
+    --border:  #cccccc;
+    --text:    #000000;
+    --muted:   #555555;
+    --accent:  #c84b00;
+    --accent2: #b07000;
   }
 
   html, body {
-    margin: 0;
-    padding: 0;
-    height: 100%;
+    min-height: 100%;
     background: var(--bg);
+    color: var(--text);
+    font-family: 'JetBrains Mono', monospace;
+    transition: background 0.25s, color 0.25s;
   }
 
-  body {
+  /* ── theme toggle ── */
+  .theme-toggle {
+    position: fixed;
+    top: 18px; right: 20px;
+    z-index: 100;
+    width: 52px; height: 28px;
+    border-radius: 14px;
+    background: var(--border);
+    border: none; cursor: pointer; padding: 0;
+    transition: background 0.25s;
+  }
+  .toggle-thumb {
+    position: absolute;
+    top: 4px; left: 4px;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--bg);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 12px; line-height: 1;
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1);
+    pointer-events: none;
+  }
+  :root.light .toggle-thumb { transform: translateX(24px); }
+  .theme-toggle:hover { background: var(--muted); }
+
+  /* ── landing ── */
+  #landing {
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: flex-start;
-    min-height: 100vh;
-    padding: 0;
-  }
-
-  /* ── top chrome bar ── */
-  .chrome-bar {
-    width: 100%;
-    max-width: 860px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 14px 20px 0;
-  }
-
-  .dot {
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-  }
-  .dot.red    { background: #ff3b30; }
-  .dot.yellow { background: #ffcc00; }
-  .dot.green  { background: #28cd41; }
-
-  .chrome-title {
-    flex: 1;
-    text-align: center;
-    font-family: 'JetBrains Mono', monospace;
-    font-size: 12px;
-    color: var(--muted);
-    letter-spacing: 0.04em;
-  }
-
-  /* ── toggle switch ── */
-  .theme-toggle {
-    position: relative;
-    width: 52px;
-    height: 28px;
-    border-radius: 14px;
-    background: var(--border);
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    flex-shrink: 0;
-    transition: background 0.25s;
-  }
-
-  .toggle-thumb {
-    position: absolute;
-    top: 4px;
-    left: 4px;
-    width: 20px;
-    height: 20px;
-    border-radius: 50%;
-    background: var(--bg-panel);
-    display: flex;
-    align-items: center;
     justify-content: center;
-    font-size: 12px;
-    line-height: 1;
-    transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
-    pointer-events: none;
+    gap: 0;
+    padding: 40px 24px 60px;
   }
 
-  :root.light .toggle-thumb {
-    transform: translateX(24px);
+  .name {
+    font-size: clamp(28px, 6vw, 52px);
+    font-weight: 500;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    opacity: 0;
+    transform: translateY(12px);
   }
+  .name.go { animation: rise 0.35s ease forwards; }
 
-  .theme-toggle:hover { background: var(--muted); }
+  .role {
+    font-size: clamp(12px, 2.2vw, 17px);
+    color: var(--accent);
+    margin-top: 10px;
+    letter-spacing: 0.03em;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .role.go { animation: rise 0.35s ease forwards; animation-delay: 0.08s; }
 
-  /* ── terminal wrapper ── */
-  .terminal-frame {
-    width: 100%;
-    max-width: 860px;
-    margin: 10px 0 0;
+  .divider {
+    width: clamp(140px, 30vw, 240px);
+    height: 1px;
+    background: var(--border);
+    margin: 32px 0;
+    opacity: 0;
+  }
+  .divider.go { animation: fade 0.35s ease forwards; animation-delay: 0.16s; }
+
+  .buttons {
+    display: flex;
+    gap: 14px;
+    flex-wrap: wrap;
+    justify-content: center;
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  .buttons.go { animation: rise 0.35s ease forwards; animation-delay: 0.24s; }
+
+  .btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: clamp(13px, 2vw, 16px);
+    letter-spacing: 0.06em;
+    padding: 13px 28px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 2px solid var(--accent);
+    transition: background 0.15s, color 0.15s, transform 0.1s;
+  }
+  .btn:hover { transform: translateY(-2px); }
+
+  .btn-about {
+    background: transparent;
+    color: var(--text);
+  }
+  .btn-about:hover { background: var(--accent); color: var(--bg); }
+
+  .btn-terminal {
+    background: var(--accent);
+    color: var(--bg);
+  }
+  .btn-terminal:hover { background: transparent; color: var(--text); }
+
+  .btn-snake {
+    background: transparent;
+    color: var(--text);
+    border-color: var(--accent2);
+  }
+  .btn-snake:hover { background: var(--accent2); color: var(--bg); }
+
+  /* ── about panel ── */
+  #about-panel {
+    display: none;
+    max-width: 560px;
+    margin-top: 36px;
+    font-size: clamp(14px, 2vw, 17px);
+    line-height: 1.85;
+    color: var(--text);
+    text-align: left;
+    opacity: 0;
+    animation: fade 0.3s ease forwards;
+  }
+  #about-panel.open { display: block; }
+
+  #about-panel ul {
+    list-style: none;
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+  }
+  #about-panel ul li { margin-bottom: 10px; }
+  #about-panel ul a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  #about-panel ul a:hover { border-bottom-color: var(--accent); }
+
+  #about-panel .contact-line {
+    margin-top: 20px;
+    border-top: 1px solid var(--border);
+    padding-top: 20px;
+    color: var(--muted);
+  }
+  #about-panel .contact-line a {
+    color: var(--accent);
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    transition: border-color 0.15s;
+  }
+  #about-panel .contact-line a:hover { border-bottom-color: var(--accent); }
+
+  /* ── snake panel ── */
+  #snake-panel {
+    display: none;
+    width: min(600px, 92vmin, 95vw);
+    margin-top: 24px;
     border: 1px solid var(--border);
-    border-radius: 10px;
+    border-radius: 8px;
     overflow: hidden;
-    box-shadow:
-      0 0 0 1px #0a0908,
-      0 24px 64px rgba(0,0,0,0.55),
-      0 4px 16px rgba(0,0,0,0.4);
-    flex: 1;
+    opacity: 0;
+    animation: fade 0.3s ease forwards;
+  }
+  #snake-panel.open { display: block; }
+  #snake-panel iframe {
+    width: 100%;
+    height: calc(min(600px, 92vmin, 95vw) + 80px);
+    border: none;
+    display: block;
   }
 
-  /* ── jquery.terminal overrides ── */
+  /* ── terminal panel ── */
+  #terminal-panel {
+    display: none;
+    width: min(900px, 95vw);
+    height: max(420px, 60vh);
+    margin-top: 24px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    opacity: 0;
+    animation: fade 0.3s ease forwards;
+  }
+  #terminal-panel.open { display: block; }
+  #term-frame { height: 100%; }
+
   .terminal,
   .terminal .cmd,
   .terminal .terminal-output,
@@ -149,122 +232,191 @@
   .terminal .terminal-output a,
   .terminal .cmd div,
   .terminal .cmd span {
-    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace !important;
+    font-family: 'JetBrains Mono', monospace !important;
     font-size: 18px !important;
     line-height: 1.75 !important;
   }
-
   .terminal {
-    background: var(--bg-panel) !important;
+    background: var(--panel) !important;
     color: var(--text) !important;
     padding: 20px 24px !important;
-    min-height: calc(100vh - 80px) !important;
+    height: 100% !important;
     border-radius: 0 !important;
-    transition: background 0.25s, color 0.25s;
+  }
+  .terminal .cmd .prompt span { color: var(--accent) !important; }
+  .terminal .cmd .cursor      { background: var(--accent) !important; }
+  .terminal .cmd span         { color: var(--text) !important; }
+  .terminal .terminal-output div { text-align: justify; }
+  .terminal a { text-decoration: none !important; }
+  .terminal::-webkit-scrollbar { width: 6px; }
+  .terminal::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+  @keyframes rise {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes fade {
+    to { opacity: 1; }
   }
 
-  @media (max-width: 600px) {
-    .chrome-bar { padding: 10px 14px 0; }
-    .chrome-title { font-size: 11px; }
-    .terminal-frame { margin-top: 6px; border-radius: 6px; }
-    .terminal,
-    .terminal .cmd,
-    .terminal .terminal-output,
-    .terminal .terminal-output div,
-    .terminal .terminal-output span,
-    .terminal .terminal-output a,
-    .terminal .cmd div,
-    .terminal .cmd span {
+  @media (max-width: 500px) {
+    .buttons { flex-direction: column; align-items: stretch; }
+    .btn { text-align: center; }
+    .terminal, .terminal .cmd, .terminal .terminal-output,
+    .terminal .terminal-output div, .terminal .terminal-output span,
+    .terminal .terminal-output a, .terminal .cmd div, .terminal .cmd span {
       font-size: 15px !important;
     }
-    .terminal {
-      padding: 14px 14px !important;
-      line-height: 1.6 !important;
-    }
   }
-
-  /* prompt */
-  .terminal .cmd .prompt span {
-    color: var(--accent) !important;
-  }
-
-  /* cursor */
-  .terminal .cmd .cursor {
-    background: var(--accent) !important;
-    opacity: 0.85;
-  }
-
-  /* typed command text */
-  .terminal .cmd span {
-    color: var(--text) !important;
-  }
-
-  /* output text alignment */
-  .terminal .terminal-output div {
-    text-align: justify;
-    text-justify: inter-word;
-  }
-
-  /* links inside terminal */
-  .terminal a {
-    text-decoration: none !important;
-    border-bottom: 1px solid rgba(201,149,110,0.35) !important;
-    transition: color 0.15s, border-color 0.15s;
-  }
-
-  /* scrollbar */
-  .terminal::-webkit-scrollbar { width: 6px; }
-  .terminal::-webkit-scrollbar-track { background: transparent; }
-  .terminal::-webkit-scrollbar-thumb {
-    background: var(--border);
-    border-radius: 3px;
-  }
-  .terminal::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 </style>
 </head>
 <body>
 
-<div class="chrome-bar">
-  <div class="dot red"></div>
-  <div class="dot yellow"></div>
-  <div class="dot green"></div>
-  <div class="chrome-title">thisisdevanshu.com — terminal</div>
-  <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
-    <span class="toggle-thumb" id="toggle-thumb">🌙</span>
-  </button>
-</div>
+<button class="theme-toggle" id="theme-toggle" title="Toggle theme">
+  <span class="toggle-thumb" id="toggle-thumb">🌙</span>
+</button>
 
-<div class="terminal-frame">
-  <!-- jquery.terminal mounts here -->
+<!-- landing -->
+<div id="landing">
+  <div class="name">Devanshu Singh</div>
+  <div class="role">Senior Software Engineer · Microsoft</div>
+  <div class="divider"></div>
+  <div class="buttons">
+    <button class="btn btn-about"    id="btn-about">about</button>
+    <button class="btn btn-terminal" id="btn-terminal">terminal</button>
+    <button class="btn btn-snake"    id="btn-snake">play snake</button>
+  </div>
+  <div id="about-panel">
+    <p>Over ten years of back-end and server experience building high-performance,
+    scalable products for early-stage startups across a wide breadth of tech stacks.
+    Also developed USSD products for telecom operators across South and Southeast Asia.</p>
+    <ul>
+      <li><a href="https://github.com/thisisdevanshu/Distributed-Systems" target="_blank">1. Cryptocurrency using Blockchain</a></li>
+      <li><a href="https://github.com/thisisdevanshu/Landmark-Detection-CNN" target="_blank">2. Landmark Detection via Deep CNNs</a></li>
+      <li><a href="https://github.com/thisisdevanshu/Hyper-spectral-Image-Segmentation" target="_blank">3. Hyperspectral Image Segmentation (clustering)</a></li>
+      <li><a href="https://github.com/thisisdevanshu" target="_blank">→ github.com/thisisdevanshu</a></li>
+    </ul>
+    <div class="contact-line">reach me at <a href="mailto:thisisdevanshu@gmail.com">thisisdevanshu@gmail.com</a></div>
+  </div>
+  <div id="snake-panel">
+    <iframe id="snake-frame" title="Snake game"></iframe>
+  </div>
+  <div id="terminal-panel">
+    <div id="term-frame"></div>
+  </div>
 </div>
 
 <script>
-var about = `
-[[;#da7756;]Devanshu Singh] — Senior Software Engineer at Microsoft
+// ── theme ────────────────────────────────────────────────────
+const root   = document.documentElement;
+const toggle = document.getElementById('theme-toggle');
+const thumb  = document.getElementById('toggle-thumb');
+
+function applyTheme(light) {
+    root.classList.toggle('light', light);
+    thumb.textContent = light ? '☀️' : '🌙';
+}
+applyTheme(localStorage.getItem('theme') === 'light');
+toggle.addEventListener('click', () => {
+    const isLight = !root.classList.contains('light');
+    applyTheme(isLight);
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+    if (termInited) recolorAll(isLight);
+    snakeFrame?.contentWindow?.postMessage({ theme: isLight ? 'light' : 'dark' }, '*');
+});
+
+// ── stagger on load ───────────────────────────────────────────
+['name','role','divider','buttons'].forEach(cls => {
+    document.querySelector('.' + cls)?.classList.add('go');
+});
+
+// ── panel helpers ─────────────────────────────────────────────
+const aboutPanel  = document.getElementById('about-panel');
+const btnAbout    = document.getElementById('btn-about');
+const termPanel   = document.getElementById('terminal-panel');
+const btnTerminal = document.getElementById('btn-terminal');
+const snakePanel  = document.getElementById('snake-panel');
+const snakeFrame  = document.getElementById('snake-frame');
+const btnSnake    = document.getElementById('btn-snake');
+
+function closeAll() {
+    aboutPanel.classList.remove('open');
+    btnAbout.textContent = 'about';
+
+    snakePanel.classList.remove('open');
+    snakeFrame.src = '';
+    btnSnake.textContent = 'play snake';
+
+    termPanel.classList.remove('open');
+    btnTerminal.textContent = 'terminal';
+}
+
+// ── about toggle ─────────────────────────────────────────────
+btnAbout.addEventListener('click', () => {
+    const wasOpen = aboutPanel.classList.contains('open');
+    closeAll();
+    if (!wasOpen) {
+        aboutPanel.classList.add('open');
+        aboutPanel.style.animation = 'none';
+        aboutPanel.offsetHeight;
+        aboutPanel.style.animation = '';
+        btnAbout.textContent = 'close';
+    }
+});
+
+// ── snake ────────────────────────────────────────────────────
+function openSnakePanel() {
+    const wasOpen = snakePanel.classList.contains('open');
+    closeAll();
+    if (!wasOpen) {
+        snakePanel.classList.add('open');
+        snakePanel.style.animation = 'none';
+        snakePanel.offsetHeight;
+        snakePanel.style.animation = '';
+        snakeFrame.src = './snakes.html';
+        snakeFrame.onload = () => snakeFrame.contentWindow.focus();
+        btnSnake.textContent = 'close';
+    }
+}
+
+btnSnake.addEventListener('click', openSnakePanel);
+
+// ── terminal ─────────────────────────────────────────────────
+const ORANGE_VALS = new Set(['#da7756','rgb(218, 119, 86)']);
+
+function colorEl(el, isLight) {
+    if (el.dataset.origColor === undefined) el.dataset.origColor = el.style.color || '';
+    const orig = el.dataset.origColor;
+    const isOrange = ORANGE_VALS.has(orig) || ORANGE_VALS.has(getComputedStyle(el).color);
+    el.style.color = isOrange ? (isLight ? '#c84b00' : '#da7756') : (isLight ? '#000' : '#fff');
+}
+function recolorAll(isLight) {
+    document.querySelectorAll('#term-frame .terminal-output div, #term-frame .terminal-output span')
+        .forEach(el => colorEl(el, isLight));
+}
+
+let termInited = false;
+function initTerminal() {
+    if (termInited) return;
+    termInited = true;
+
+    const about = `[[;#da7756;]Devanshu Singh] — Senior Software Engineer at Microsoft
 
 M.S. Computer Science (Machine Learning), University of Florida
 
 Over ten years of back-end and server experience building high-performance,
 scalable products for early-stage startups across a wide breadth of tech
 stacks. Also developed USSD products for telecom operators across South
-and Southeast Asia.
-`
+and Southeast Asia.`
+    const contact = `reach me at  [[!;#da7756;;;mailto:thisisdevanshu@gmail.com]thisisdevanshu@gmail.com]`
 
-var contact = `
-reach me at  [[!;#da7756;;;mailto:thisisdevanshu@gmail.com]thisisdevanshu@gmail.com]
-`
-
-var project = `
-[[;#da7756;]selected projects]
+    const project = `[[;#da7756;]selected projects]
 
   [[!;#da7756;;;https://github.com/thisisdevanshu/Distributed-Systems]1. Cryptocurrency using Blockchain]
   [[!;#da7756;;;https://github.com/thisisdevanshu/Landmark-Detection-CNN]2. Landmark Detection via Deep CNNs]
   [[!;#da7756;;;https://github.com/thisisdevanshu/Hyper-spectral-Image-Segmentation]3. Hyperspectral Image Segmentation (clustering)]
 
-  [[!;#da7756;;;https://github.com/thisisdevanshu]→ github.com/thisisdevanshu]
-`
-
-var help = `
+  [[!;#da7756;;;https://github.com/thisisdevanshu]→ github.com/thisisdevanshu]`
+    const help = `
 available commands
 
   [[;#da7756;]about]    —  who I am
@@ -274,111 +426,57 @@ available commands
   [[;#da7756;]snake]    —  play snake
   [[;#da7756;]help]     —  show this list
 `
+    const commands = {
+        help:    function() { this.echo(help); },
+        about:   function() { this.echo(about); },
+        contact: function() { this.echo(contact); },
+        project: function() { this.echo(project); },
+        tldr:    function() { this.echo(about + '\n\n' + project + '\n\n' + contact); },
+        snake:   function() { openSnakePanel(); }
+    };
 
-var isMobile = window.innerWidth < 600;
+    $('#term-frame').terminal(function(cmd) {
+        const name = cmd.trim().split(/\s+/)[0];
+        if (commands[name]) {
+            commands[name].call(this);
+        } else {
+            this.echo('[[;#da7756;]lol not a real terminal sorry]');
+        }
+    }, {
+        greetings: `type [[;#da7756;]help] or [[;#da7756;]tldr] to explore`,
+        prompt: '[[;#da7756;]❯] ',
+        checkArity: false, exit: false,
+        onInit: function() { recolorAll(root.classList.contains('light')); }
+    });
 
-var greetings = isMobile ? `
-[[;#da7756;]devanshu singh]
-senior software engineer · microsoft
-──────────────────────────────
-m.s. cs (ml) · university of florida
+    const observer = new MutationObserver(mutations => {
+        const isLight = root.classList.contains('light');
+        mutations.forEach(m => m.addedNodes.forEach(node => {
+            if (node.nodeType !== 1) return;
+            colorEl(node, isLight);
+            node.querySelectorAll('div, span').forEach(el => colorEl(el, isLight));
+        }));
+    });
+    observer.observe(document.getElementById('term-frame'), { childList: true, subtree: true });
 
-  type [[;#da7756;]help] to explore  ·  [[;#da7756;]tldr] for everything
-` : `
-[[;#da7756;]  ██████╗ ███████╗]    devanshu singh
-[[;#da7756;]  ██╔══██╗██╔════╝]    senior software engineer · microsoft
-[[;#da7756;]  ██║  ██║███████╗]    ──────────────────────────────
-[[;#da7756;]  ██║  ██║╚════██║]    m.s. cs · university of florida
-[[;#da7756;]  ██████╔╝███████║]    backend · AI · distributed systems
-[[;#da7756;]  ╚═════╝ ╚══════╝]
-
-  type [[;#da7756;]help] to explore  ·  [[;#da7756;]tldr] for everything at once
-`;
-
-const toggle = document.getElementById('theme-toggle');
-const thumb  = document.getElementById('toggle-thumb');
-const root   = document.documentElement;
-
-// All orange hex values used in content strings
-const ORANGE_VALS = new Set(['#da7756', '#ff6d00', 'rgb(218, 119, 86)', 'rgb(255, 109, 0)']);
-
-function colorEl(el, isLight) {
-    if (el.dataset.origColor === undefined) {
-        el.dataset.origColor = el.style.color || '';
-    }
-    const orig = el.dataset.origColor;
-    const isOrange = ORANGE_VALS.has(orig) || ORANGE_VALS.has(getComputedStyle(el).color);
-    el.style.color = isOrange
-        ? (isLight ? '#c84b00' : '#ff6d00')
-        : (isLight ? '#000000' : '#ffffff');
+    document.getElementById('term-frame').addEventListener('click', e => {
+        const a = e.target.closest('a');
+        if (a) { e.preventDefault(); window.open(a.href, '_blank'); }
+    });
 }
 
-function recolorAll(isLight) {
-    document.querySelectorAll(
-        '.terminal-frame .terminal-output div, .terminal-frame .terminal-output span'
-    ).forEach(el => colorEl(el, isLight));
-}
-
-$('.terminal-frame').terminal({
-    help: function() {
-        this.echo(help);
-    },
-    about: function() {
-        this.echo(about);
-    },
-    contact: function() {
-        this.echo(contact);
-    },
-    project: function() {
-        this.echo(project);
-    },
-    tldr: function() {
-        this.echo(about + project + contact);
-    },
-    snake: function() {
-        window.location = './snakes.html';
-    }
-}, {
-    greetings: greetings,
-    prompt: '[[;#da7756;]❯] ',
-    checkArity: false,
-    exit: false,
-    onInit: function() {
+btnTerminal.addEventListener('click', () => {
+    const wasOpen = termPanel.classList.contains('open');
+    closeAll();
+    if (!wasOpen) {
+        termPanel.classList.add('open');
+        termPanel.style.animation = 'none';
+        termPanel.offsetHeight;
+        termPanel.style.animation = '';
+        initTerminal();
         recolorAll(root.classList.contains('light'));
+        btnTerminal.textContent = 'close';
     }
-});
-
-// Recolor any new output added after theme was set
-const observer = new MutationObserver(mutations => {
-    const isLight = root.classList.contains('light');
-    mutations.forEach(m => m.addedNodes.forEach(node => {
-        if (node.nodeType !== 1) return;
-        colorEl(node, isLight);
-        node.querySelectorAll('div, span').forEach(el => colorEl(el, isLight));
-    }));
-});
-
-function applyTheme(light) {
-    root.classList.toggle('light', light);
-    thumb.textContent = light ? '☀️' : '🌙';
-    recolorAll(light);
-}
-
-const frame = document.querySelector('.terminal-frame');
-observer.observe(frame, { childList: true, subtree: true });
-
-// Open all terminal links in a new tab
-frame.addEventListener('click', e => {
-    const a = e.target.closest('a');
-    if (a) { e.preventDefault(); window.open(a.href, '_blank'); }
-});
-
-applyTheme(localStorage.getItem('theme') === 'light');
-
-toggle.addEventListener('click', () => {
-    const isLight = !root.classList.contains('light');
-    applyTheme(isLight);
-    localStorage.setItem('theme', isLight ? 'light' : 'dark');
 });
 </script>
 
