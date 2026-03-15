@@ -4,13 +4,15 @@ import { outsideGrid } from './grid.js'
 
 let lastRenderTime = 0
 let gameOver = false
+let gameOverShown = false
 const gameBoard = document.getElementById('game-board')
 document.body.style.overflow = "hidden";
 
 function main(currentTime) {
     if (gameOver) {
-        if(confirm('You lost. Press ok to restart')) {
-            window.location = '/snakes.html'
+        if (!gameOverShown) {
+            gameOverShown = true
+            document.getElementById('game-over-overlay').classList.add('visible')
         }
         return
     }

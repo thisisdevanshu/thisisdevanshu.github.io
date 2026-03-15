@@ -1,82 +1,386 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devanshu Singh</title>
 
 <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
 <script src="https://unpkg.com/jquery.terminal/js/jquery.terminal.min.js"></script>
 <link rel="stylesheet" href="https://unpkg.com/jquery.terminal/css/jquery.terminal.min.css"/>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+
+<style>
+  * {
+    box-sizing: border-box;
+  }
+
+  :root {
+    --bg:        #000000;
+    --bg-panel:  #0a0a0a;
+    --border:    #333333;
+    --text:      #ffffff;
+    --muted:     #ffffff;
+    --accent:    #ff6d00;
+    --accent2:   #ff9100;
+    --link:      #ff6d00;
+    --toggle-bg: rgba(255,255,255,0.08);
+    transition: background 0.25s;
+  }
+
+  :root.light {
+    --bg:        #ffffff;
+    --bg-panel:  #ffffff;
+    --border:    #bbbbbb;
+    --text:      #000000;
+    --muted:     #000000;
+    --accent:    #c84b00;
+    --accent2:   #e65100;
+    --link:      #c84b00;
+    --toggle-bg: rgba(0,0,0,0.08);
+  }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: var(--bg);
+  }
+
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  /* ── top chrome bar ── */
+  .chrome-bar {
+    width: 100%;
+    max-width: 860px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 14px 20px 0;
+  }
+
+  .dot {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+  }
+  .dot.red    { background: #ff3b30; }
+  .dot.yellow { background: #ffcc00; }
+  .dot.green  { background: #28cd41; }
+
+  .chrome-title {
+    flex: 1;
+    text-align: center;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.04em;
+  }
+
+  /* ── toggle switch ── */
+  .theme-toggle {
+    position: relative;
+    width: 52px;
+    height: 28px;
+    border-radius: 14px;
+    background: var(--border);
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
+    transition: background 0.25s;
+  }
+
+  .toggle-thumb {
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--bg-panel);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    line-height: 1;
+    transition: transform 0.25s cubic-bezier(.4,0,.2,1), background 0.25s;
+    pointer-events: none;
+  }
+
+  :root.light .toggle-thumb {
+    transform: translateX(24px);
+  }
+
+  .theme-toggle:hover { background: var(--muted); }
+
+  /* ── terminal wrapper ── */
+  .terminal-frame {
+    width: 100%;
+    max-width: 860px;
+    margin: 10px 0 0;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px #0a0908,
+      0 24px 64px rgba(0,0,0,0.55),
+      0 4px 16px rgba(0,0,0,0.4);
+    flex: 1;
+  }
+
+  /* ── jquery.terminal overrides ── */
+  .terminal,
+  .terminal .cmd,
+  .terminal .terminal-output,
+  .terminal .terminal-output div,
+  .terminal .terminal-output div div,
+  .terminal .terminal-output span,
+  .terminal .terminal-output a,
+  .terminal .cmd div,
+  .terminal .cmd span {
+    font-family: 'JetBrains Mono', 'Fira Mono', 'Courier New', monospace !important;
+    font-size: 18px !important;
+    line-height: 1.75 !important;
+  }
+
+  .terminal {
+    background: var(--bg-panel) !important;
+    color: var(--text) !important;
+    padding: 20px 24px !important;
+    min-height: calc(100vh - 80px) !important;
+    border-radius: 0 !important;
+    transition: background 0.25s, color 0.25s;
+  }
+
+  @media (max-width: 600px) {
+    .chrome-bar { padding: 10px 14px 0; }
+    .chrome-title { font-size: 11px; }
+    .terminal-frame { margin-top: 6px; border-radius: 6px; }
+    .terminal,
+    .terminal .cmd,
+    .terminal .terminal-output,
+    .terminal .terminal-output div,
+    .terminal .terminal-output span,
+    .terminal .terminal-output a,
+    .terminal .cmd div,
+    .terminal .cmd span {
+      font-size: 15px !important;
+    }
+    .terminal {
+      padding: 14px 14px !important;
+      line-height: 1.6 !important;
+    }
+  }
+
+  /* prompt */
+  .terminal .cmd .prompt span {
+    color: var(--accent) !important;
+  }
+
+  /* cursor */
+  .terminal .cmd .cursor {
+    background: var(--accent) !important;
+    opacity: 0.85;
+  }
+
+  /* typed command text */
+  .terminal .cmd span {
+    color: var(--text) !important;
+  }
+
+  /* output text alignment */
+  .terminal .terminal-output div {
+    text-align: justify;
+    text-justify: inter-word;
+  }
+
+  /* links inside terminal */
+  .terminal a {
+    text-decoration: none !important;
+    border-bottom: 1px solid rgba(201,149,110,0.35) !important;
+    transition: color 0.15s, border-color 0.15s;
+  }
+
+  /* scrollbar */
+  .terminal::-webkit-scrollbar { width: 6px; }
+  .terminal::-webkit-scrollbar-track { background: transparent; }
+  .terminal::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+  }
+  .terminal::-webkit-scrollbar-thumb:hover { background: var(--muted); }
+</style>
 </head>
 <body>
-</body>
-</html>
+
+<div class="chrome-bar">
+  <div class="dot red"></div>
+  <div class="dot yellow"></div>
+  <div class="dot green"></div>
+  <div class="chrome-title">thisisdevanshu.com — terminal</div>
+  <button class="theme-toggle" id="theme-toggle" title="Toggle light/dark mode">
+    <span class="toggle-thumb" id="toggle-thumb">🌙</span>
+  </button>
+</div>
+
+<div class="terminal-frame">
+  <!-- jquery.terminal mounts here -->
+</div>
 
 <script>
-$('body').terminal({
-    help: function() {
-    	this.echo(help)        
-    },
-    about: function() {
-    	this.echo($(img));
-    	this.echo(about)        
-    },
-    contact: function() {
-    	this.echo(contact)        
-    },
-    project: function() {
-    	this.echo(project)        
-    },
-    tldr: function() {
-    	this.echo($(img));
-    	this.echo(about + project + contact)
-    },
-    snake: function() {
-        window.location = './snakes.html'
-    }
-    
-}, {
-    greetings: "Welcome to www.thisisdevanshu.com\n\n	Type 'help' to start navigating my website.\n 		OR\n 	Just type 'tldr'\n\n"
-});
+var about = `
+[[;#da7756;]Devanshu Singh] — Senior Software Engineer at Microsoft
 
-var img = '<img src="https://media-exp1.licdn.com/dms/image/C4D03AQHaSNnAtDa2Ew/profile-displayphoto-shrink_400_400/0?e=1602115200&v=beta&t=aNwjhaC7ghf4tr7jmtggr44PIrJymgjU6YK_IxHwN5A">'
+M.S. Computer Science (Machine Learning), University of Florida
 
-var about = ` 	
-
-Devanshu Singh - Software Engineer at Microsoft.
-
-I have a Masters degree in Computer Science (Machine Learning) from the
-University of Florida.
-
-I have an experience of five years in back-end and server technologies,
-wherein I have built high-performance scalable products for early-stage
-startups using a vast breadth of tech stacks. I have also developed
-USSD(Unstructured Supplementary Services Data) products for various 
-telecom operators of South and Southeast Asia.
-    		`
+Over ten years of back-end and server experience building high-performance,
+scalable products for early-stage startups across a wide breadth of tech
+stacks. Also developed USSD products for telecom operators across South
+and Southeast Asia.
+`
 
 var contact = `
-Feel free to reach me out at [[!;;;;thisisdevanshu@gmail.com]email]
-  			`
-var project = `
-Listing few of my projects here
-
-	1. [[!;;;;https://bitbucket.org/thisisdevanshu/elixir/src/master/proj4.1/bitcoin/]Cryptocurrency using blockchain]
-    2. [[!;;;;https://bitbucket.org/thisisdevanshu/skynet/src/master/]Landmark detection using Deep Convolutional Neural Networks]
-    3. [[!;;;;https://bitbucket.org/thisisdevanshu/cap6610machinelearning/src/master/]Hyperspectral Image Segmentation using various clustering algorithms]
-    				
-For more projects visit my [[!;;;;https://www.linkedin.com/in/devanshusingh2/]linkedIn]
-    			`
-var help = `		
-Here is a list of supported commands in lexicographical order:
-
-    1. about
-    2. contact 
-    3. help
-    4. project
-    5. tldr
+reach me at  [[!;#da7756;;;mailto:thisisdevanshu@gmail.com]thisisdevanshu@gmail.com]
 `
-	
+
+var project = `
+[[;#da7756;]selected projects]
+
+  [[!;#da7756;;;https://github.com/thisisdevanshu/Distributed-Systems]1. Cryptocurrency using Blockchain]
+  [[!;#da7756;;;https://github.com/thisisdevanshu/Landmark-Detection-CNN]2. Landmark Detection via Deep CNNs]
+  [[!;#da7756;;;https://github.com/thisisdevanshu/Hyper-spectral-Image-Segmentation]3. Hyperspectral Image Segmentation (clustering)]
+
+  [[!;#da7756;;;https://github.com/thisisdevanshu]→ github.com/thisisdevanshu]
+`
+
+var help = `
+available commands
+
+  [[;#da7756;]about]    —  who I am
+  [[;#da7756;]project]  —  things I've built
+  [[;#da7756;]contact]  —  how to reach me
+  [[;#da7756;]tldr]     —  everything at once
+  [[;#da7756;]snake]    —  play snake
+  [[;#da7756;]help]     —  show this list
+`
+
+var isMobile = window.innerWidth < 600;
+
+var greetings = isMobile ? `
+[[;#da7756;]devanshu singh]
+senior software engineer · microsoft
+──────────────────────────────
+m.s. cs (ml) · university of florida
+
+  type [[;#da7756;]help] to explore  ·  [[;#da7756;]tldr] for everything
+` : `
+[[;#da7756;]  ██████╗ ███████╗]    devanshu singh
+[[;#da7756;]  ██╔══██╗██╔════╝]    senior software engineer · microsoft
+[[;#da7756;]  ██║  ██║███████╗]    ──────────────────────────────
+[[;#da7756;]  ██║  ██║╚════██║]    m.s. cs · university of florida
+[[;#da7756;]  ██████╔╝███████║]    backend · AI · distributed systems
+[[;#da7756;]  ╚═════╝ ╚══════╝]
+
+  type [[;#da7756;]help] to explore  ·  [[;#da7756;]tldr] for everything at once
+`;
+
+const toggle = document.getElementById('theme-toggle');
+const thumb  = document.getElementById('toggle-thumb');
+const root   = document.documentElement;
+
+// All orange hex values used in content strings
+const ORANGE_VALS = new Set(['#da7756', '#ff6d00', 'rgb(218, 119, 86)', 'rgb(255, 109, 0)']);
+
+function colorEl(el, isLight) {
+    if (el.dataset.origColor === undefined) {
+        el.dataset.origColor = el.style.color || '';
+    }
+    const orig = el.dataset.origColor;
+    const isOrange = ORANGE_VALS.has(orig) || ORANGE_VALS.has(getComputedStyle(el).color);
+    el.style.color = isOrange
+        ? (isLight ? '#c84b00' : '#ff6d00')
+        : (isLight ? '#000000' : '#ffffff');
+}
+
+function recolorAll(isLight) {
+    document.querySelectorAll(
+        '.terminal-frame .terminal-output div, .terminal-frame .terminal-output span'
+    ).forEach(el => colorEl(el, isLight));
+}
+
+$('.terminal-frame').terminal({
+    help: function() {
+        this.echo(help);
+    },
+    about: function() {
+        this.echo(about);
+    },
+    contact: function() {
+        this.echo(contact);
+    },
+    project: function() {
+        this.echo(project);
+    },
+    tldr: function() {
+        this.echo(about + project + contact);
+    },
+    snake: function() {
+        window.location = './snakes.html';
+    }
+}, {
+    greetings: greetings,
+    prompt: '[[;#da7756;]❯] ',
+    checkArity: false,
+    exit: false,
+    onInit: function() {
+        recolorAll(root.classList.contains('light'));
+    }
+});
+
+// Recolor any new output added after theme was set
+const observer = new MutationObserver(mutations => {
+    const isLight = root.classList.contains('light');
+    mutations.forEach(m => m.addedNodes.forEach(node => {
+        if (node.nodeType !== 1) return;
+        colorEl(node, isLight);
+        node.querySelectorAll('div, span').forEach(el => colorEl(el, isLight));
+    }));
+});
+
+function applyTheme(light) {
+    root.classList.toggle('light', light);
+    thumb.textContent = light ? '☀️' : '🌙';
+    recolorAll(light);
+}
+
+const frame = document.querySelector('.terminal-frame');
+observer.observe(frame, { childList: true, subtree: true });
+
+// Open all terminal links in a new tab
+frame.addEventListener('click', e => {
+    const a = e.target.closest('a');
+    if (a) { e.preventDefault(); window.open(a.href, '_blank'); }
+});
+
+applyTheme(localStorage.getItem('theme') === 'light');
+
+toggle.addEventListener('click', () => {
+    const isLight = !root.classList.contains('light');
+    applyTheme(isLight);
+    localStorage.setItem('theme', isLight ? 'light' : 'dark');
+});
 </script>
 
-
-
-
+</body>
+</html>
