@@ -32,8 +32,17 @@
     --accent2: #b07000;
   }
 
-  html, body {
+  html {
     height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+  body {
+    height: 100%;
+    overflow: hidden;
+    overscroll-behavior: none;
+    position: fixed; /* prevents iOS Safari rubber-band scroll */
+    width: 100%;
     background: var(--bg);
     color: var(--text);
     font-family: 'JetBrains Mono', monospace;
@@ -68,6 +77,7 @@
   /* ── landing ── */
   #landing {
     height: 100vh;
+    height: 100dvh; /* mobile: excludes browser chrome */
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -296,9 +306,25 @@
     to { opacity: 1; }
   }
 
-  @media (max-width: 500px) {
-    .buttons { flex-direction: column; align-items: stretch; }
+  @media (max-width: 600px) {
+    /* Home: stack buttons vertically */
+    .buttons { flex-direction: column; align-items: stretch; width: min(280px, 88vw); }
     .btn { text-align: center; }
+
+    /* Minimized: hide name/role, show only buttons in a tight row */
+    #landing.has-panel .header { gap: 8px; padding-right: 70px; }
+    #landing.has-panel .name  { display: none; }
+    #landing.has-panel .role  { display: none; }
+    #landing.has-panel .buttons {
+      flex-direction: row;
+      width: auto;
+      margin-left: 0;
+      align-items: center;
+      flex-wrap: nowrap;
+      gap: 6px;
+    }
+    #landing.has-panel .btn { padding: 5px 10px; font-size: 11px; }
+
     .terminal, .terminal .cmd, .terminal .terminal-output,
     .terminal .terminal-output div, .terminal .terminal-output span,
     .terminal .terminal-output a, .terminal .cmd div, .terminal .cmd span {
@@ -421,6 +447,7 @@ toggle.addEventListener('click', () => {
                 `opacity:0`,
                 `z-index:500`,
                 `pointer-events:none`,
+                `will-change:transform`,
             ].join(';');
             document.body.appendChild(div);
             return { el: div, r, type, finalBg, border };
